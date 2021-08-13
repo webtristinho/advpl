@@ -1,0 +1,140 @@
+#INCLUDE 'protheus.ch'
+#INCLUDE 'topconn.ch'
+
+//author: @webtristinho - 12/08/2021
+
+User Function RELTST1()
+	Private oReport := Nil
+	Private oSecCab := Nil
+	Private cPerg:= Padr("123456789",10)
+    Pergunte(cPerg,.F.)
+	ReportDef()
+	oReport:PrintDialog()
+Return
+
+Static Function ReportDef()
+	oReport := TReport():New("Relatório Financeiro","Relatório Financeiro",cPerg,{|oReport| PrintReport(oReport)},"Relatório Financeiro")
+	oReport:SetLandscape(.T.)
+	oSecCab := TRSection():New( oReport , "Relatório Financeiro", {"QRY"} )
+	TRCell():New( oSecCab, "CT2_CCD"    , "QRY")
+	TRCell():New( oSecCab, "DESCR_CC"    , "QRY")
+	TRCell():New( oSecCab, "CT2_DEBITO"    , "QRY")
+	TRCell():New( oSecCab, "DESCR_CONTA"    , "QRY")
+	TRCell():New( oSecCab, "GRUPO"    , "QRY")
+	TRCell():New( oSecCab, "CT2_HIST"    , "QRY")
+	TRCell():New( oSecCab, "CT2_VALOR"    , "QRY")
+	TRCell():New( oSecCab, "CT2_AT01DB"    , "QRY")
+	TRCell():New( oSecCab, "CT2_AT02DB"    , "QRY")
+	TRCell():New( oSecCab, "CT2_AT03DB"    , "QRY")
+	TRCell():New( oSecCab, "E2_BAIXA"    , "QRY")
+	TRCell():New( oSecCab, "E2_VENCREA"    , "QRY")
+	TRCell():New( oSecCab, "E2_NATUREZ"    , "QRY")
+	TRCell():New( oSecCab, "E2_EMISSAO"    , "QRY")
+	TRCell():New( oSecCab, "CT2_DATA"    , "QRY")
+Return
+
+Static Function PrintReport(oReport)
+
+oSecCab:BeginQuery()
+
+BeginSql alias 'CT2'
+
+SELECT 
+CT2_CCD
+,isnull((select CTT_DESC01 From CTT200 where D_E_L_E_T_ !='*' and CTT_CUSTO = CT2_CCD ), '    ')  DESCR_CC
+,CT2_DEBITO
+,isnull((select CT1_DESC01 From CT1200 where D_E_L_E_T_ !='*' and CT1_CONTA = CT2_DEBITO ), '    ')  DESCR_CONTA
+,case 
+when CT2_DEBITO IN ('41116406') THEN 'Comunicação'
+when CT2_DEBITO IN ('41116407','41116207','41116208','41116426') THEN 'Carros da empresa'
+when CT2_DEBITO IN ('41116414') THEN 'Educação de Funcionários'
+when CT2_DEBITO IN ('41116412','41116115','41116417') THEN 'Frete'
+when CT2_DEBITO IN ('41116410') THEN 'Combustível'
+when CT2_DEBITO IN ('41116422') THEN 'Seguro de automóvel'
+when CT2_DEBITO IN ('41116409','41116405','41116420','41116403') THEN 'Material de manutenção'
+when CT2_DEBITO IN ('41116423') THEN 'Serviços adquiridos'
+when CT2_DEBITO IN ('41116415','41116425') THEN 'Pedágios'
+when CT2_DEBITO IN ('41116101','41116102','41116103','41116105') THEN 'Ferramentas'
+when CT2_DEBITO IN ('41116421') THEN 'Despesas de viagem'
+when CT2_DEBITO IN ('41117301') THEN 'Plano de saúde'
+when CT2_DEBITO IN ('41116429') THEN 'Alimentação'
+when CT2_DEBITO IN ('41117302') THEN 'Vale transporte'
+when CT2_DEBITO IN ('41116206') THEN 'Todos os outros'
+when CT2_DEBITO IN ('41116402') THEN 'Não considerar'
+else 'Todos os outros'
+end GRUPO
+,CT2_HIST
+,CT2_VALOR
+,CT2_AT01DB
+,CT2_AT02DB
+,CT2_AT03DB
+,E2_BAIXA
+,E2_VENCREA
+,E2_NATUREZ
+,E2_EMISSAO
+,CT2_DATA
+FROM CT2200
+INNER JOIN SE2200 ON CT2_AT01DB=E2_NUM AND CT2_AT02DB=E2_FORNECE AND CT2_AT03DB=E2_LOJA
+
+WHERE E2_VENCREA >= %exp:MV_PAR01%
+AND E2_VENCREA <= %exp:MV_PAR02%
+AND CT2_CCD >= %exp:MV_PAR03%
+AND CT2_CCD <= %exp:MV_PAR04%
+AND CT2_DEBITO >= %exp:MV_PAR05%
+AND CT2_DEBITO <= %exp:MV_PAR06%
+AND CT2_DATA >= %exp:MV_PAR07%
+AND CT2_DATA <= %exp:MV_PAR08%
+
+UNION
+
+SELECT 
+CT2_CCD
+,isnull((select CTT_DESC01 From CTT200 where D_E_L_E_T_ !='*' and CTT_CUSTO = CT2_CCD ), '    ')  DESCR_CC
+,CT2_DEBITO
+,isnull((select CT1_DESC01 From CT1200 where D_E_L_E_T_ !='*' and CT1_CONTA = CT2_DEBITO ), '    ')  DESCR_CONTA
+,case 
+when CT2_DEBITO IN ('41116406') THEN 'Comunicação'
+when CT2_DEBITO IN ('41116407','41116207','41116208','41116426') THEN 'Carros da empresa'
+when CT2_DEBITO IN ('41116414') THEN 'Educação de Funcionários'
+when CT2_DEBITO IN ('41116412','41116115','41116417') THEN 'Frete'
+when CT2_DEBITO IN ('41116410') THEN 'Combustível'
+when CT2_DEBITO IN ('41116422') THEN 'Seguro de automóvel'
+when CT2_DEBITO IN ('41116409','41116405','41116420','41116403') THEN 'Material de manutenção'
+when CT2_DEBITO IN ('41116423') THEN 'Serviços adquiridos'
+when CT2_DEBITO IN ('41116415','41116425') THEN 'Pedágios'
+when CT2_DEBITO IN ('41116101','41116102','41116103','41116105') THEN 'Ferramentas'
+when CT2_DEBITO IN ('41116421') THEN 'Despesas de viagem'
+when CT2_DEBITO IN ('41117301') THEN 'Plano de saúde'
+when CT2_DEBITO IN ('41116429') THEN 'Alimentação'
+when CT2_DEBITO IN ('41117302') THEN 'Vale transporte'
+when CT2_DEBITO IN ('41116206') THEN 'Todos os outros'
+when CT2_DEBITO IN ('41116402') THEN 'Não considerar'
+else 'Todos os outros'
+end GRUPO
+,CT2_HIST
+,CT2_VALOR
+,CASE 
+WHEN CT2_AT01DB IN ('                    ') THEN ' ' END CT2_AT01DB
+,CASE
+WHEN CT2_AT02DB IN ('                    ') THEN ' ' END CT2_AT02DB
+,CASE
+WHEN CT2_AT03DB IN ('                    ') THEN ' ' END CT2_AT03DB
+,'' E2_BAIXA
+,'' E2_VENCREA
+,'' E2_NATUREZ
+,'' E2_EMISSAO
+,CT2_DATA
+
+FROM CT2200
+
+WHERE CT2_DATA >= %exp:MV_PAR07%
+AND CT2_DATA <= %exp:MV_PAR08%
+AND CT2_CCD >= %exp:MV_PAR03%
+AND CT2_CCD <= %exp:MV_PAR04%
+AND CT2_DEBITO >= %exp:MV_PAR05%
+AND CT2_DEBITO <= %exp:MV_PAR06%
+
+EndSql
+	oSecCab:EndQuery()
+	oSecCab:Print()
+Return
